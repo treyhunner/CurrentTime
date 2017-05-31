@@ -1,18 +1,14 @@
+#!/usr/bin/env python3.6
 """
 Tweet current time:
 
     $ python3 tweet_time.py
 
-Tweet specific time:
-
-    $ python3 tweet_time.py 19:00
-
-Time is only tweeted if on the hour or 30 minutes past.
+Time is rounded down to the half hour.
 
 """
 from datetime import datetime
 import os
-import sys
 import tweepy
 
 
@@ -56,9 +52,8 @@ api = tweepy.API(auth)
 
 
 def tweet_time(now):
-    if now.minute % 30 != 0:
-        print("Time is not a multiple of 30.")
-        return
+    """Tweet given time (rounded down to the half hour)."""
+    now = now.replace(minute=now.minute // 30)
     time24 = now.strftime('%H:%M')
     time_emoji = EMOJI[now.strftime('%I:%M')]
     message = f"{time24} {time_emoji}"
@@ -66,14 +61,5 @@ def tweet_time(now):
     api.update_status(status=message)
 
 
-def main(arguments):
-    if not arguments:
-        now = datetime.now()
-    else:
-        (time_string,) = arguments  # Raise exception if more than 1 argument
-        now = datetime.strptime(time_string, '%H:%M')
-    tweet_time(now)
-
-
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    tweet_time(datetime.now())
